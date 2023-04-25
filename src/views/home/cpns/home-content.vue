@@ -3,12 +3,14 @@ import useHomeStore from '@/stores/modules/home';
 import { storeToRefs } from 'pinia';
 import houseItemV9 from '@/components/house-item-v9/house-item-v9.vue';
 import houseItemV3 from '@/components/house-item-v3/house-item-v3.vue';
+import { useRoute, useRouter } from 'vue-router';
 
 const homeStore = useHomeStore()
 const { houselist } = storeToRefs(homeStore)
 
+const router = useRouter()
 const itemClick = (item) => {
-    console.log("itemclick", item.houseId)
+    router.push("/detail/" + item.houseId)
 }
 </script>
 
