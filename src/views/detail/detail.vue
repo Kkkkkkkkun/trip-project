@@ -7,11 +7,12 @@ import DetailSwipe from './cpns/detail-swipe.vue'
 
 const router = useRouter()
 const route = useRoute()
+const houseId = route.params.id
 
 //发送网络请求
 const detailInfos = ref({})
-const mainPart = computed(() => {detailInfos.value.mainPart})
-getDetailInfos(route.params.id).then(res => {
+const mainPart = computed(() => detailInfos.value.mainPart)
+getDetailInfos(houseId).then(res => {
     detailInfos.value = res.data
 })
 
