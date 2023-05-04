@@ -1,7 +1,7 @@
 <script setup>
 import { useRoute, useRouter } from 'vue-router';
 import { getDetailInfos } from '@/service'
-import { computed, ref } from 'vue';
+import { computed, ref, } from 'vue';
 import DetailSwipe from './cpns/detail-swipe.vue'
 import DetailInfos from './cpns/detail-infos.vue'
 import detailFacility from './cpns/detail-facility.vue';
@@ -31,24 +31,29 @@ const onClickLeft = () => {
 </script>
 
 <template>
-  <div class="detail top-page" >
+  <div class="detail top-page" ref="detailRef">
     <van-nav-bar
         title="房屋详情"
         left-text="旅途"
         left-arrow
         @click-left="onClickLeft"
     />
-
     <div class="main" v-if="mainPart">
-        <DetailSwipe :swipe-data="mainPart.topModule.housePicture.housePics" />
-        <DetailInfos :top-infos="mainPart.topModule"/>
-        <detailFacility :house-facility="mainPart.dynamicModule.facilityModule.houseFacility" />
-        <detailLandlord :landlord="mainPart.dynamicModule.landlordModule"/>
-        <detailComment :comment="mainPart.dynamicModule.commentModule"/>
-        <detailNotice :order-rules="mainPart.dynamicModule.rulesModule.orderRules" />
-        <detailMap />
-        <detailIntro :price-intro="mainPart.introductionModule"/>
+      <DetailSwipe :swipe-data="mainPart.topModule.housePicture.housePics" />
+      <DetailInfos :top-infos="mainPart.topModule"/>
+      <detailFacility :house-facility="mainPart.dynamicModule.facilityModule.houseFacility" />
+      <detailLandlord :landlord="mainPart.dynamicModule.landlordModule"/>
+      <detailComment :comment="mainPart.dynamicModule.commentModule"/>
+      <detailNotice :order-rules="mainPart.dynamicModule.rulesModule.orderRules" />
+      <detailMap />
+      <detailIntro :price-intro="mainPart.introductionModule"/>
     </div>
+    <van-action-bar>
+        <van-action-bar-icon icon="chat-o" text="客服" />
+        <van-action-bar-icon icon="cart-o" text="购物车" />
+        <van-action-bar-icon icon="shop-o" text="店铺" />
+        <van-action-bar-button color="#ff9854" type="danger" text="立即购买" />
+    </van-action-bar>
     <div class="footer">
       <img src="@/assets/img/detail/icon_ensure.png" alt="">
       <div class="text">弘源旅途, 永无止境!</div>
@@ -63,6 +68,7 @@ const onClickLeft = () => {
   align-items: center;
   justify-content: center;
   height: 120px;
+  margin-bottom: 20px;
 
   img {
     width: 123px;
