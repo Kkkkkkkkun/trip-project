@@ -36,7 +36,7 @@ const onClickLeft = () => {
 const detailRef = ref()
 const { scrollTop } = useScroll(detailRef)
 const showTabControl = computed(() => {
-  return scrollTop.value >= 100
+  return scrollTop.value >= 300
 })
 
 const sectionEls = ref({})
