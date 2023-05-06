@@ -1,15 +1,18 @@
 <script setup>
 import { useRoute, useRouter } from 'vue-router';
 import { getDetailInfos } from '@/service'
-import { computed, ref, } from 'vue';
+import { computed, ref, watch } from 'vue';
+
+import tabControl from '@/components/tab-control/tab-control.vue';
 import DetailSwipe from './cpns/detail-swipe.vue'
 import DetailInfos from './cpns/detail-infos.vue'
-import detailFacility from './cpns/detail-facility.vue';
-import detailLandlord from './cpns/detail-landlord.vue';
-import detailComment from './cpns/detail-comment.vue';
-import detailNotice from './cpns/detail-notice.vue';
-import detailMap from './cpns/detail-map.vue';
-import detailIntro from './cpns/detail-intro.vue';
+import DetailFacility from './cpns/detail-facility.vue';
+import DetailLandlord from './cpns/detail-landlord.vue';
+import DetailComment from './cpns/detail-comment.vue';
+import DetailNotice from './cpns/detail-notice.vue';
+import DetailMap from './cpns/detail-map.vue';
+import DetailIntro from './cpns/detail-intro.vue';
+import useScroll from '@/hooks/useScroll'
 
 
 const router = useRouter()
@@ -28,25 +31,92 @@ getDetailInfos(houseId).then(res => {
 const onClickLeft = () => {
     router.back()
 }
+
+// tabControl相关的操作
+const detailRef = ref()
+const { scrollTop } = useScroll(detailRef)
+const showTabControl = computed(() => {
+  return scrollTop.value >= 100
+})
+
+const sectionEls = ref({})
+const names = computed(() => {
+  return Object.keys(sectionEls.value)
+})
+const getSectionRef = (value) => {
+  if (!value) return
+  const name = value.$el.getAttribute("name")
+  sectionEls.value[name] = value.$el
+}
+
+let isClick = false
+let currentDistance = -1
+const tabClick = (index) => {
+  const key = Object.keys(sectionEls.value)[index]
+  const el = sectionEls.value[key]
+  let distance = el.offsetTop
+  if (index !== 0) {
+    distance = distance - 44
+  }
+
+  isClick = true
+  currentDistance = distance
+
+  detailRef.value.scrollTo({
+    top: distance,
+    behavior: "smooth"
+  })
+}
+
+
+// 页面滚动, 滚动时匹配对应的tabControll的index
+const tabControlRef = ref()
+watch(scrollTop, (newValue) => {
+  if (newValue === currentDistance) {
+    isClick = false
+  }
+  if (isClick) return
+
+  // 1.获取所有的区域的offsetTops
+  const els = Object.values(sectionEls.value)
+  const values = els.map(el => el.offsetTop)
+
+  // 2.根据newValue去匹配想要索引
+  let index = values.length - 1
+  for (let i = 0; i < values.length; i++) {
+    if (values[i] > newValue + 44) {
+      index = i - 1
+      break
+    }
+  }
+  tabControlRef.value?.setCurrentIndex(index)
+})
 </script>
 
 <template>
   <div class="detail top-page" ref="detailRef">
+    <tab-control
+      v-if="showTabControl"
+      class="tabs"
+      :titles="names"
+      @tabItemClick="tabClick"
+      ref="tabControlRef"
+    />
     <van-nav-bar
         title="房屋详情"
         left-text="旅途"
         left-arrow
         @click-left="onClickLeft"
     />
-    <div class="main" v-if="mainPart">
+    <div class="main" v-if="mainPart" v-memo="[mainPart]">
       <DetailSwipe :swipe-data="mainPart.topModule.housePicture.housePics" />
-      <DetailInfos :top-infos="mainPart.topModule"/>
-      <detailFacility :house-facility="mainPart.dynamicModule.facilityModule.houseFacility" />
-      <detailLandlord :landlord="mainPart.dynamicModule.landlordModule"/>
-      <detailComment :comment="mainPart.dynamicModule.commentModule"/>
-      <detailNotice :order-rules="mainPart.dynamicModule.rulesModule.orderRules" />
-      <detailMap />
-      <detailIntro :price-intro="mainPart.introductionModule"/>
+      <DetailInfos name="描述" :ref="getSectionRef" :top-infos="mainPart.topModule"/>
+      <DetailFacility name="设施" :ref="getSectionRef" :house-facility="mainPart.dynamicModule.facilityModule.houseFacility" />
+      <DetailLandlord name="房东" :ref="getSectionRef" :landlord="mainPart.dynamicModule.landlordModule"/>
+      <DetailComment name="评论" :ref="getSectionRef" :comment="mainPart.dynamicModule.commentModule"/>
+      <DetailNotice name="须知" :ref="getSectionRef" :order-rules="mainPart.dynamicModule.rulesModule.orderRules" />
+      <DetailMap name="周边" :ref="getSectionRef" />
+      <DetailIntro :price-intro="mainPart.introductionModule"/>
     </div>
     <van-action-bar>
         <van-action-bar-icon icon="chat-o" text="客服" />
@@ -62,6 +132,14 @@ const onClickLeft = () => {
 </template>
 
 <style lang="less" scoped>
+.tabs {
+  position: fixed;
+  z-index: 9;
+  left: 0;
+  right: 0;
+  top: 0;
+}
+
 .footer {
   display: flex;
   flex-direction: column;
