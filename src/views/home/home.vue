@@ -1,3 +1,6 @@
+<script>
+  export default { name: "home"}
+</script>
 <script setup>
 import { computed, ref, watch } from 'vue'
 import homeNavBar from './cpns/home-nav-bar.vue';
